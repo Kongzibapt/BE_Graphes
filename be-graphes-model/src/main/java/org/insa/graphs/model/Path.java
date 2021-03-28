@@ -29,13 +29,38 @@ public class Path {
      * 
      * @throws IllegalArgumentException If the list of nodes is not valid, i.e. two
      *         consecutive nodes in the list are not connected in the graph.
-     * 
-     * @deprecated Need to be implemented.
      */
     public static Path createFastestPathFromNodes(Graph graph, List<Node> nodes)
             throws IllegalArgumentException {
         List<Arc> arcs = new ArrayList<Arc>();
-        // TODO:
+
+        if (nodes.size() == 1){
+            return new Path(graph,nodes.get(0));
+        } else if (nodes.size() == 0){
+            return new Path(graph);
+        } else {
+
+            for (int i = 0; i < nodes.size()-1; i++){
+                double min = Double.MAX_VALUE;
+                Arc goodArc = null;
+                for (Arc arc : nodes.get(i).getSuccessors()){
+                    if(arc.getDestination().equals(nodes.get(i+1))){// Recherche du prochain node le plus rapide
+                        if (arc.getMinimumTravelTime() < min){
+                            goodArc = arc;
+                            min = arc.getMinimumTravelTime();
+                        }
+                    }
+                }
+
+                if (goodArc == null){
+                    throw new IllegalArgumentException();
+                }
+
+                arcs.add(goodArc);
+            }
+
+        }
+
         return new Path(graph, arcs);
     }
 
@@ -60,24 +85,27 @@ public class Path {
             return new Path(graph,nodes.get(0));
         } else if (nodes.size() == 0){
             return new Path(graph);
-        }
-
-        Node currentNode = nodes.get(0);
-        while (currentNode != nodes.get(nodes.size()-1)) {
-            float min = Float.MAX_VALUE;
-            Arc goodArc = null;
-            for (Arc arc : currentNode.getSuccessors()){
-                // Recherche du prochain node le plus proche
-                if (arc.getLength() < min){
-                    goodArc = arc;
-                    min = goodArc.getLength();
-                }
-            }
-            arcs.add(goodArc);
-            currentNode = goodArc.getDestination();
-        }
-
+        } else {
         
+            for (int i = 0; i < nodes.size()-1;i++) {
+                float min = Float.MAX_VALUE;
+                Arc goodArc = null;
+                for (Arc arc : nodes.get(i).getSuccessors()){
+                    // Recherche du prochain node le plus proche
+                    if (arc.getDestination().equals(nodes.get(i+1))){
+                        if (arc.getLength() < min){
+                            goodArc = arc;
+                            min = goodArc.getLength();
+                        }
+                    }
+                }
+                if (goodArc == null){
+                    throw new IllegalArgumentException();
+                }
+                arcs.add(goodArc);
+            }
+
+        }
 
         return new Path(graph, arcs);
     }
