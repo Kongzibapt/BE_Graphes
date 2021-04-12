@@ -44,7 +44,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         Label label_y = null;
         boolean the_end = false;
 
-        while ((!tas.isEmpty()) && !the_end){
+        while (!(tas.isEmpty()) && !the_end){
 
             label_x = tas.deleteMin();
             label_x.mark = true;
@@ -74,23 +74,24 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                 }
             }
         }
-        Path path_solution = null;
+        
         List<Node> nodes_solution = new ArrayList<Node>();
 
         if (!the_end){
+            solution = new ShortestPathSolution(data,Status.INFEASIBLE,Path.createShortestPathFromNodes(graph,nodes_solution));
+        } else {    
             Label current_label = label_x;
-            nodes_solution.add(label_x.currentSummit);
-            Node current_arc = current_label.father.getOrigin();
-            nodes_solution.add(current_arc);
+            nodes_solution.add(0,label_x.currentSummit);
+            Node current_node = current_label.father.getOrigin();
+            nodes_solution.add(0,current_node);
             while (labels.get(current_label.father.getOrigin().getId()).father != null){
                 current_label = labels.get(current_label.father.getOrigin().getId());
-                current_arc = current_label.father.getOrigin();
-                nodes_solution.add(0,current_arc);
+                current_node = current_label.father.getOrigin();
+                nodes_solution.add(0,current_node);
             }
-            solution = new ShortestPathSolution(data,Status.INFEASIBLE,path_solution);
-        } else {    
-            path_solution = Path.createShortestPathFromNodes(graph, nodes_solution);
+            Path path_solution = Path.createShortestPathFromNodes(graph, nodes_solution);
             solution = new ShortestPathSolution(data,Status.OPTIMAL,path_solution);
+            
         }
 
         return solution;
