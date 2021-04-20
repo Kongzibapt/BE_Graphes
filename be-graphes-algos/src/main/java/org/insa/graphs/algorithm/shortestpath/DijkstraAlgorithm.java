@@ -23,6 +23,10 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
         Graph graph = data.getGraph();
         List<Node> nodes = graph.getNodes();
+
+        if (data.getDestination() == data.getOrigin()){
+            return new ShortestPathSolution(data,Status.INFEASIBLE,new Path(graph));
+        }
         
         List<Label> labels = new ArrayList<Label>();
         BinaryHeap<Label> tas = new BinaryHeap<Label>(); 
@@ -57,7 +61,9 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                 the_end = true;
             } else {
                 Node node_x = nodes.get(label_x.currentSummit.getId());
+                // System.out.println("nb nodes : "+node_x.getNumberOfSuccessors());
                 for (Arc arc : node_x.getSuccessors()){
+                    // System.out.println("One successor");
                     if (!data.isAllowed(arc)) {
                         continue;
                     }
@@ -94,9 +100,13 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                 nodes_solution.add(0,current_node);
             }
             Path path_solution = Path.createShortestPathFromNodes(graph, nodes_solution);
+            // System.out.println("Chemin valide ? "+path_solution.isValid());
+            // System.out.println("Path : "+path_solution.getLength()+" Algo : "+label_x.cost);
             solution = new ShortestPathSolution(data,Status.OPTIMAL,path_solution);
             notifyDestinationReached(data.getDestination());
         }
+
+        
 
         return solution;
     }
