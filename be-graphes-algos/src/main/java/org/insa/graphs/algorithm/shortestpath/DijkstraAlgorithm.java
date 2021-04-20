@@ -27,6 +27,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         List<Label> labels = new ArrayList<Label>();
         BinaryHeap<Label> tas = new BinaryHeap<Label>(); 
         
+        // Notify observers about the first event (origin processed).
+        notifyOriginProcessed(data.getOrigin());
 
         // INITIALISATION
         // Boucle for qui va de 0 à N-1 : N = nombre de nodes
@@ -47,7 +49,9 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         while (!(tas.isEmpty()) && !the_end){
 
             label_x = tas.deleteMin();
+            notifyNodeReached(label_x.currentSummit);
             label_x.mark = true;
+            // System.out.println("Coût : "+label_x.cost);
             if (label_x == labels.get(data.getDestination().getId())){
                 // On est arrivé au dernier noeud, on peut sortir de la boucle
                 the_end = true;
@@ -91,7 +95,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
             }
             Path path_solution = Path.createShortestPathFromNodes(graph, nodes_solution);
             solution = new ShortestPathSolution(data,Status.OPTIMAL,path_solution);
-            
+            notifyDestinationReached(data.getDestination());
         }
 
         return solution;
