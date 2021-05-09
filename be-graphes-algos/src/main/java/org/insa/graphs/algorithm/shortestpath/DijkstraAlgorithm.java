@@ -63,7 +63,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
             label_x = tas.deleteMin();
             notifyNodeReached(label_x.getCurrentSummit());
             label_x.setMark(true);
-            // System.out.println("Coût : "+label_x.origin_Cost);
+            // System.out.println("Coût : "+label_x.getTotalCost());
             if (label_x == labels.get(data.getDestination().getId())){
                 // On est arrivé au dernier noeud, on peut sortir de la boucle
                 the_end = true;
@@ -91,6 +91,9 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                     }
                 }
             }
+
+            // System.out.println("Le tas est valide : "+tas.isValid());
+
         }
         
         List<Node> nodes_solution = new ArrayList<Node>();
