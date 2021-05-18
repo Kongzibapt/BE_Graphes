@@ -3,6 +3,7 @@ package org.insa.graphs.algorithm.shortestpath;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.insa.graphs.algorithm.AbstractInputData;
 import org.insa.graphs.algorithm.AbstractSolution.Status;
 import org.insa.graphs.algorithm.utils.BinaryHeap;
 import org.insa.graphs.model.Arc;
@@ -29,11 +30,13 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         final ShortestPathData data = getInputData();
         ShortestPathSolution solution = null;
 
+        // System.out.println(data.getMode());
+
         Graph graph = data.getGraph();
         List<Node> nodes = graph.getNodes();
 
         if (data.getDestination() == data.getOrigin()){
-            return new ShortestPathSolution(data,Status.INFEASIBLE,new Path(graph));
+            return new ShortestPathSolution(data,Status.FEASIBLE,new Path(graph));
         }
         
         List<Label> labels = new ArrayList<Label>();
@@ -79,7 +82,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                     label_y = labels.get(y.getId());
                     if (!(label_y.getMark())){
                         float old_origin_Cost = label_y.getOriginCost();
-                        label_y.setOriginCost(Math.min(old_origin_Cost,(label_x.getOriginCost()+arc.getLength())));
+                        label_y.setOriginCost(Math.min(old_origin_Cost,(label_x.getOriginCost()+(float)data.getCost(arc))));
                         if (old_origin_Cost != label_y.getOriginCost()){
                             // On fait remove puis insert pour mettre à jour et le mettre au bon endroit dans le tas
                             if (old_origin_Cost != Float.MAX_VALUE){
@@ -99,7 +102,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         List<Node> nodes_solution = new ArrayList<Node>();
 
         if (!the_end){
-            solution = new ShortestPathSolution(data,Status.INFEASIBLE,Path.createShortestPathFromNodes(graph,nodes_solution));
+                solution = new ShortestPathSolution(data,Status.INFEASIBLE,Path.createShortestPathFromNodes(graph,nodes_solution));
         } else {    
             Label current_label = label_x;
             nodes_solution.add(0,label_x.getCurrentSummit());
@@ -110,7 +113,14 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                 current_node = current_label.getFather().getOrigin();
                 nodes_solution.add(0,current_node);
             }
-            Path path_solution = Path.createShortestPathFromNodes(graph, nodes_solution);
+            Path path_solution = null;
+            // if (data.getMode() == AbstractInputData.Mode.LENGTH){
+            //     System.out.println("Shortest");
+                path_solution = Path.createShortestPathFromNodes(graph, nodes_solution);
+            // } else if(data.getMode() == AbstractInputData.Mode.TIME){
+            //     System.out.println("Fastest");
+            //     path_solution = Path.createFastestPathFromNodes(graph,nodes_solution);
+            // }
             // System.out.println("Chemin valide ? "+path_solution.isValid());
             // System.out.println("Path : "+path_solution.getLength()+" Algo : "+label_x.origin_Cost);
             solution = new ShortestPathSolution(data,Status.OPTIMAL,path_solution);
