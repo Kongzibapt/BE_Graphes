@@ -3,7 +3,6 @@ package org.insa.graphs.algorithm.shortestpath;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.insa.graphs.algorithm.AbstractInputData;
 import org.insa.graphs.algorithm.AbstractSolution.Status;
 import org.insa.graphs.algorithm.utils.BinaryHeap;
 import org.insa.graphs.model.Arc;
@@ -17,11 +16,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         super(data);
     }
 
-    public void setCost(Label label, float cost) {
-        label.setOriginCost(cost);
-    }
-
-    public Label makeLabel(Node node,Node destination){
+    public Label makeLabel(Node node,ShortestPathData data) {
         return(new Label(node));
     }
 
@@ -48,7 +43,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         // INITIALISATION
         // Boucle for qui va de 0 à N-1 : N = nombre de nodes
         for (int i = 0; i < nodes.size();i++) {
-            Label currentLabel = makeLabel(nodes.get(i),data.getDestination());
+            Label currentLabel = makeLabel(nodes.get(i),data);
             currentLabel.setMark(false);
             currentLabel.setOriginCost(Float.MAX_VALUE);
             currentLabel.setFather(null);

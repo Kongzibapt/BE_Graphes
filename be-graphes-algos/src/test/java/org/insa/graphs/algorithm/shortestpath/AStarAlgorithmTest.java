@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.insa.graphs.algorithm.ArcInspector;
 import org.insa.graphs.algorithm.ArcInspectorFactory;
@@ -21,33 +22,28 @@ public class AStarAlgorithmTest {
     
     // Graph used for tests
     private static Graph insa_map;
-    // private static Graph carre_dense_map;
+    private static Graph carre_dense_map;
 
     private static List<Node> nodes_insa = new ArrayList<Node>();
-    // private static List<Node> nodes_carre_dense = new ArrayList<Node>();
+    private static List<Node> nodes_carre_dense = new ArrayList<Node>();
 
     private static GraphReader readerInsa;
-    // private static GraphReader readerCarreDense;
+    private static GraphReader readerCarreDense;
 
     @BeforeClass
     public static void initAll() throws IOException {
 
         String mapInsa = "C:/Users/bapti/OneDrive/Documents/COURS/S2/Graphes/BE_Graphes/maps_tf/insa.mapgr";
-        // String mapCarreDense = "C:/Users/bapti/OneDrive/Documents/COURS/S2/Graphes/BE_Graphes/maps_tf/carre-dense.mapgr";
+        String mapCarreDense = "C:/Users/bapti/OneDrive/Documents/COURS/S2/Graphes/BE_Graphes/maps_tf/carre-dense.mapgr";
 
         readerInsa = new BinaryGraphReader(new DataInputStream (new BufferedInputStream(new FileInputStream(mapInsa))));
-        // readerCarreDense = new BinaryGraphReader(new DataInputStream (new BufferedInputStream(new FileInputStream(mapCarreDense))));
+        readerCarreDense = new BinaryGraphReader(new DataInputStream (new BufferedInputStream(new FileInputStream(mapCarreDense))));
 
         insa_map = readerInsa.read();
-        // carre_dense_map = readerCarreDense.read();
+        carre_dense_map = readerCarreDense.read();
         
         nodes_insa = insa_map.getNodes();
-        // nodes_carre_dense = insa_map.getNodes();
-
-        // Créer des scénarios différents
-        // - Cartes Routière / Non routière
-        // - Coût en Temps / Distance
-        // - Origine et Destination différentes
+        nodes_carre_dense = insa_map.getNodes();
 
     }
 
@@ -67,10 +63,6 @@ public class AStarAlgorithmTest {
             // Unique Summit
             AStarAlgorithm A_Sh_all_roads_oneSummit = new AStarAlgorithm(new ShortestPathData(insa_map,nodes_insa.get(0),nodes_insa.get(0),arc_inspectors.get(0)));
             assertEquals(A_Sh_all_roads_oneSummit.run().isFeasible(),true);
-
-            // Path not valid
-            // AStarAlgorithm D_Sh_all_roads_invalid = new AStarAlgorithm(new ShortestPathData(g1,nodes.get(1256),null,arc_inspectors.get(0)));
-            // assertEquals(D_Sh_all_roads_invalid.run().getPath().isValid(),false);
 
 
         readerInsa.close();
@@ -183,5 +175,59 @@ public class AStarAlgorithmTest {
     }
     readerInsa.close();
 }
+
+@Test
+public void testMapCarreDense() throws IOException {
+
+    List<ArcInspector> arc_inspectors = ArcInspectorFactory.getAllFilters();
+    int nb_tests_valid = 0;
+    int index = 0;
+
+    // On génère 50 paires Origine/Destination
+    int id_origin;
+    int id_dest;
+    List<List<Node>> couples_nodes = new ArrayList<>(); 
+    for (int i = 0; i <50;i++){
+        List<Node> aux_list = new ArrayList<>();
+        id_origin = (int)(Math.random()*nodes_carre_dense.size());
+        aux_list.add(nodes_carre_dense.get(id_origin));
+        id_dest = (int)(Math.random()*nodes_carre_dense.size());
+        aux_list.add(nodes_carre_dense.get(id_dest));
+        couples_nodes.add(aux_list);   
+    }
+
+    while(nb_tests_valid < 50){
+
+        ArcInspector Short_all = arc_inspectors.get(0);
+
+        AStarAlgorithm astar_short_all = new AStarAlgorithm(new ShortestPathData(insa_map,couples_nodes.get(index).get(0),couples_nodes.get(index).get(1),Short_all));
+        ShortestPathSolution astar_sol_short_all = astar_short_all.run();
+
+        ArcInspector Fast_all = arc_inspectors.get(2);
+
+        AStarAlgorithm astar_fast_all = new AStarAlgorithm(new ShortestPathData(insa_map,couples_nodes.get(index).get(0),couples_nodes.get(index).get(1),Fast_all));
+        ShortestPathSolution astar_sol_fast_all = astar_fast_all.run();
+        
+        if (astar_sol_short_all.isFeasible() && astar_sol_fast_all.isFeasible()){
+            nb_tests_valid++;
+
+            // Comparaison de la longueur du path en distance avec la longueur du path en temps
+            assertTrue(astar_sol_short_all.getPath().getLength()<=astar_sol_fast_all.getPath().getLength());
+
+            // Comparaison du temps du path en temps avec le temps du path en distance
+            assertTrue(astar_sol_fast_all.getPath().getMinimumTravelTime()<=astar_sol_short_all.getPath().getMinimumTravelTime());
+        }
+
+
+        index = (index + 1) %50;
+    }
+
+    readerCarreDense.close();
 }
+
+}
+
+// Tester pour une carte très grande : carre dense
+//     - L'algo en temps doit être inférieur en temps par rapport à l'algo en distance
+//     - L'algo en distance doit être inférieur en distance par rapport à l'algo en temps
 
